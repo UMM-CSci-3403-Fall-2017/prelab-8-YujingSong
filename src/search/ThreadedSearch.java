@@ -2,7 +2,7 @@ package search;
 
 import java.util.ArrayList;
 
-public class ThreadedSearch<T> implements Runnable {
+public class ThreadedSearch<T> extends Thread {
 
   private T target;
   private ArrayList<T> list;
@@ -47,11 +47,43 @@ public class ThreadedSearch<T> implements Runnable {
     * threads, wait for them to all terminate, and then return the answer
     * in the shared `Answer` instance.
     */
-    return false;
+	
+	//Construct an answer
+	Answer myanswer = new Answer();
+	
+	//Construct numThreads
+	int interval = list.size()/numThreads;
+	int threadstart;
+	int threadend;
+	
+	//Create thread array based on the number of threads
+	ThreadedSearch[] thread = new ThreadedSearch[numThreads];
+	for (int i = 0; i < numThreads; ++i){
+		//create and start thread i
+		threadstart = i * interval;
+		threadend = threadstart + (interval -1);
+		thread[i] = new ThreadedSearch(target, list, threadstart, threadend, myanswer);
+		thread[i].start(); 
+	}
+	
+	//Wait for all the threads to finish
+	for (int j = 0; j < numThreads; ++j){
+		thread[j].join();
+	}
+	
+	
+    return myanswer.getAnswer();
   }
 
-  public void run() {
 
+
+public void run() {
+	for(int i = begin; i <= end; i++ ){
+		if (list.get(i).equals(target)){
+			answer.setAnswer(true);
+		}
+	}
+	
   }
 
   private class Answer {
